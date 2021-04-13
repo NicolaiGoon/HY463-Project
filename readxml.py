@@ -77,7 +77,7 @@ def readFileXML(file):
             "authors": authors_list,
             "categories": categories_list
         }
-        print(document)
+    
         return document
 
 
@@ -96,6 +96,3 @@ def getDescendantsText(node):
     except:
         res = ''
     return res
-
-
-readFileXML("C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection\\diagnosis\\Topic_1\\0\\1852545.nxml")
