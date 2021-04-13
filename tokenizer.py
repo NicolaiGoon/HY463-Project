@@ -2,11 +2,7 @@ import readxml
 import re
 import string
 import pathlib
-import numpy as np
-
-
-def stemmer():
-    return
+import collections
 
 
 def readStopWords():
@@ -29,10 +25,7 @@ def readStopWords():
     gr_stop_words[0] = 'και'
     en_stop_words[0] = 'a'
 
-    for i in gr_stop_words:
-        stop_words.append(i)
-    for i in en_stop_words:
-        stop_words.append(i)
+    stop_words = gr_stop_words + en_stop_words
 
     return stop_words
 
@@ -47,7 +40,6 @@ def removeStopWords(tokens):
         if word not in stopwords:
             res.append(word)
 
-    print(res)
     return res
 
 
@@ -64,11 +56,65 @@ def tokenize(str):
     return res
 
 
+def getTotal(words):
+    results = {}
+    for word in words:
+        if word == 'total_unique_words':
+            continue
+        total = 0
+        for tag in words[word]:
+            total += words[word][tag]
+        results[word] = total
+    return results
+
+
+def analyzeDoc(doc):
+    unique_words = []
+    total_unique_words = 0
+    tag_tokenized = {}
+    results = {"total_unique_words": 0}
+    for tag in doc:
+        tokens = []
+        if isinstance(doc[tag], str):
+            tokens = tokenize(doc[tag])
+        elif isinstance(doc[tag], list):
+            for s in doc[tag]:
+                tokens += tokenize(s)
+        else:
+            raise Exception(
+                'Doc object must have values of string or array of strings')
+        unique_words += tokens
+        tag_tokenized[tag] = tokens
+
+    # make unique
+    unique_words = list(set(unique_words))
+    results["total_unique_words"] = len(unique_words)
+
+    # calculate frequencies of words in each tag
+    for tag in doc:
+        counter = collections.Counter(tag_tokenized[tag])
+        for word in counter:
+            if word not in results.keys():
+                results[word] = {}
+            if tag in results[word].keys():
+                results[word][tag] += counter[word]
+            else:
+                results[word][tag] = counter[word]
+
+    # print(results)
+
+    return results
+
+
 doc = readxml.readFileXML(
     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection\\diagnosis\\Topic_1\\0\\1852545.nxml")
 
-s = 'The???!@#$$%^&*()_ ? και ο η το ελλαδα www.oof.com post-procedural course was uneventful; takotsubo cardiomyopathy was the final diagnosis and the patient was, thus, discharged with a therapy consisting of aspirin, diltiazem, ramipril and atorvastatin.Figure 1Twelve-lead electrocardiogram on admission.'
-tokenize(s)
+s = {
+    'authors': ['Νίκος Γουνάκης', 'Αντώνης Γουνάκης'],
+    'body': 'The???!@#$$%^&*()_ ? και ο γουνάκης η το Ελλάδα www.oof.com post-procedural course was uneventful; takotsubo cardiomyopathy was the final diagnosis and the patient was, thus, discharged with a therapy consisting of aspirin, diltiazem, ramipril and atorvastatin.Figure 1Twelve-lead electrocardiogram on admission.'
+}
+
+print(getTotal(analyzeDoc(doc)))
 
 # tokens = doc["body"].split()
 # unique_tokens = list(set(tokens))
