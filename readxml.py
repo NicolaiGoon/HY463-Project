@@ -49,15 +49,17 @@ def readFileXML(file):
         # find authors
         authors = root.find('.//contrib-group')
         authors_list = []
-        for author in authors:
-            if author.attrib['contrib-type'] == 'author':
-                author_item = ''
-                for elem in author.iter():
-                    if elem.tag == 'name':
-                        # get name and surname
-                        author_item += elem[0].text.strip() + \
-                            ' ' + elem[1].text.strip()
-                authors_list.append(author_item)
+        # if no authors
+        if authors != None:
+            for author in authors:
+                if author.tag == 'contrib' and author.attrib['contrib-type'] == 'author':
+                    author_item = ''
+                    for elem in author.iter():
+                        if elem.tag == 'name':
+                            # get name and surname
+                            author_item += elem[0].text.strip() + \
+                                ' ' + elem[1].text.strip()
+                    authors_list.append(author_item)
         # print("authors: "+str(authors_list))
 
         # find categories
@@ -77,8 +79,9 @@ def readFileXML(file):
             "authors": authors_list,
             "categories": categories_list
         }
-    
+
         return document
+
 
 def getDescendantsText(node):
     '''
