@@ -1,16 +1,17 @@
 import collections
 import tokenizer
+import readFolders
+import nltk
 
-def analyzeAllDocs(docs):
+en_stemmer = nltk.stem.PorterStemmer()
+
+def analyzeAllDocs(folder):
     """
     Reads all docs in a folder and for each word calculates its appearance in each tag of a document
     """
     unique_words = []
     results = {}
-    i = 0
-    for doc in docs:
-        i += 1
-        analyzeDoc(doc, 'doc'+str(i), results)
+    readFolders.readAllFiles(folder,analyzeDoc,results)
 
     return results
 
@@ -36,6 +37,8 @@ def analyzeDoc(doc, doc_name, results):
     for tag in doc:
         counter = collections.Counter(tag_tokenized[tag])
         for word in counter:
+            # english stemming
+            word = en_stemmer.stem(word)
             # add new word
             if word not in results.keys():
                 results[word] = {}

@@ -64,5 +64,4 @@ def getTotal(words):
         for tag in words[word]:
             total += words[word][tag]
         results[word] = total
-    return results 
-
+    return results

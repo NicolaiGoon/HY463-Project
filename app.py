@@ -21,5 +21,6 @@ f = {
     'authors': ['Νίκος Γουνάκης']
 }
 
-res = analyzer.analyzeAllDocs([s, f])
-print(res,analyzer.getNumberOfUniqueWords(res))
+res = analyzer.analyzeAllDocs(
+    "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection")
+print("Unique Words: "+str(analyzer.getNumberOfUniqueWords(res)))
