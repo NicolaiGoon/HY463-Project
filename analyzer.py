@@ -54,6 +54,6 @@ def analyzeDoc(doc, doc_name, results):
 
 def getNumberOfUniqueWords(analyzed):
     """
-    returns the number of keys in the `analyzed` dictionary
+    returns the number of keys (words) in the `analyzed` dictionary
     """
     return len(analyzed.keys())
