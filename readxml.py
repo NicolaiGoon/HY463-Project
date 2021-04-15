@@ -80,7 +80,6 @@ def readFileXML(file):
     
         return document
 
-
 def getDescendantsText(node):
     '''
     returns all node descendants text area
