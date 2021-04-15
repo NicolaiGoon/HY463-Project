@@ -53,15 +53,3 @@ def tokenize(str):
     res = removeStopWords(res)
 
     return res
-
-
-def getTotal(words):
-    results = {}
-    for word in words:
-        if word == 'total_unique_words':
-            continue
-        total = 0
-        for tag in words[word]:
-            total += words[word][tag]
-        results[word] = total
-    return results

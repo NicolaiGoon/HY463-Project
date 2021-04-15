@@ -7,6 +7,7 @@ MAIN APP
 import readxml
 import readFolders
 import analyzer
+import indexer
 
 doc = readxml.readFileXML(
     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection\\diagnosis\\Topic_1\\0\\1852545.nxml")
@@ -24,3 +25,5 @@ f = {
 res = analyzer.analyzeAllDocs(
     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection")
 print("Unique Words: "+str(analyzer.getNumberOfUniqueWords(res)))
+
+indexer.index(res)
