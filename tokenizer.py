@@ -67,12 +67,33 @@ def getTotal(words):
         results[word] = total
     return results
 
+def getNumberOfUniqueWords(analyzed):
+    """
+    returns the number of keys in the `analyzed` dictionary
+    """
+    return len(analyzedObj.keys()) 
 
-def analyzeDoc(doc):
+def analyzeAllDocs(docs):
+    """
+    Reads all docs in a folder and for each word calculates its appearance in each tag of a document
+    """
     unique_words = []
-    total_unique_words = 0
+    results = {}
+    i = 0
+    for doc in docs:
+        i += 1
+        analyzeDoc(doc, 'doc'+str(i), results)
+
+    print()
+    print(results)
+    results["__UNIQUE_WORDS__"] = len(results.keys())
+
+
+def analyzeDoc(doc, doc_name, results):
+    """
+    Calculates how many times a word is displayed in a doc and in wich tag and append it to `results`
+    """
     tag_tokenized = {}
-    results = {"total_unique_words": 0}
     for tag in doc:
         tokens = []
         if isinstance(doc[tag], str):
@@ -83,27 +104,23 @@ def analyzeDoc(doc):
         else:
             raise Exception(
                 'Doc object must have values of string or array of strings')
-        unique_words += tokens
         tag_tokenized[tag] = tokens
-
-    # make unique
-    unique_words = list(set(unique_words))
-    results["total_unique_words"] = len(unique_words)
 
     # calculate frequencies of words in each tag
     for tag in doc:
         counter = collections.Counter(tag_tokenized[tag])
         for word in counter:
+            # add new word
             if word not in results.keys():
                 results[word] = {}
-            if tag in results[word].keys():
-                results[word][tag] += counter[word]
+            # add a word appears in a doc for the first time
+            if doc_name not in results[word].keys():
+                results[word][doc_name] = {}
+            # a word appears in a doc tag for the first time
+            if tag not in results[word][doc_name].keys():
+                results[word][doc_name][tag] = counter[word]
             else:
-                results[word][tag] = counter[word]
-
-    # print(results)
-
-    return results
+                results[word][doc_name][tag] += counter[word]
 
 
 doc = readxml.readFileXML(
@@ -111,10 +128,16 @@ doc = readxml.readFileXML(
 
 s = {
     'authors': ['Νίκος Γουνάκης', 'Αντώνης Γουνάκης'],
-    'body': 'The???!@#$$%^&*()_ ? και ο γουνάκης η το Ελλάδα www.oof.com post-procedural course was uneventful; takotsubo cardiomyopathy was the final diagnosis and the patient was, thus, discharged with a therapy consisting of aspirin, diltiazem, ramipril and atorvastatin.Figure 1Twelve-lead electrocardiogram on admission.'
+    'body': 'The???!@#$$%^&*()_ ? και ο γουνάκης η το Ελλάδα www.oof.com post-procedural παιζει course was uneventful; takotsubo cardiomyopathy was the final diagnosis and the patient was, thus, discharged with a therapy consisting of aspirin, diltiazem, ramipril and atorvastatin.Figure 1Twelve-lead electrocardiogram on admission.'
 }
 
-print(getTotal(analyzeDoc(doc)))
+f = {
+    'body': 'ο Νίκος Γουνάκης σπουδάζει στο τμήμα επιστήμης υπολογιστών , όμως και ο Αντώνης σπουδάζει εκεί. ο Νίκος παίζει κιθάρα',
+    'authors': ['Νίκος Γουνάκης']
+}
+
+analyzeAllDocs([s, f])
+# print(results)
 
 # tokens = doc["body"].split()
 # unique_tokens = list(set(tokens))
