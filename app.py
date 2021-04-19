@@ -4,11 +4,11 @@ MAIN APP
 @description Information Retrival System
 """
 
-import readxml
-import analyzer
-import indexer
+from src.Model import readxml
+from src.Model import analyzer
+from src.Model import indexer
 import time
-from Document import Document
+from src.Model.Document import Document
 
 # doc = readxml.readFileXML(
 #     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection\\diagnosis\\Topic_1\\0\\1852545.nxml")
@@ -47,4 +47,4 @@ def startIndexing():
 
 
 startIndexing()
-#testIndexing()
+# testIndexing()

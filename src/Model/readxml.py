@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from Document import Document
+from src.Model.Document import Document
 
 
 def readFileXML(file):

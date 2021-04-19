@@ -1,4 +1,4 @@
-import readxml
+from src.Model import readxml
 import re
 import string
 import pathlib

@@ -1,8 +1,8 @@
+from src.Model import tokenizer
+from src.Model import readxml
+from src.Model.Term import Term
 import collections
-import tokenizer
-import readxml
 import os
-from Term import Term
 
 
 def analyzeAllDocs(folder):

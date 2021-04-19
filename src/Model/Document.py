@@ -1,4 +1,4 @@
-import tokenizer
+from src.Model import tokenizer
 import collections
 import nltk
 
