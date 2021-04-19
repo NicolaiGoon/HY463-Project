@@ -24,6 +24,7 @@ def exportPosting(docs, terms, sorted_terms, doc_map):
                 if terms[term].id in doc.content:
                     counter += 1
                     s = str(doc.id) + '\t' + str(doc.tf(term)) + \
+                        '\t' + str(terms[term].appearances[doc.id]) + \
                         '\t' + str(doc_map[doc.id]) + '\n'
                     PostingFile.write(s)
     return post_map

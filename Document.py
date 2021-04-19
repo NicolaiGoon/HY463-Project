@@ -15,6 +15,7 @@ class Document:
         self.content = content
         self.tokenizeTags()
         self.calculateFrequencies()
+       
 
     def tokenizeTags(self):
         """
@@ -45,8 +46,10 @@ class Document:
         stemmer = nltk.stem.PorterStemmer()
         # calculate frequencies of words in each tag
         for tag in self.content:
-            counter = collections.Counter(self.content[tag])
-            for word in counter:
+            # collections.Counter(self.content[tag])
+            appearances = self.content[tag]
+            counter = 0
+            for word in appearances:
                 # english stemming
                 stemmed_word = stemmer.stem(word)
                 # add new word
@@ -54,15 +57,16 @@ class Document:
                     results[stemmed_word] = {}
                 # a word appears for the first time in a tag
                 if tag not in results[stemmed_word].keys():
-                    results[stemmed_word][tag] = counter[word]
-                else:
-                    results[stemmed_word][tag] += counter[word]
+                    results[stemmed_word][tag] = []
+                results[stemmed_word][tag].append(
+                    appearances.index(word, counter))
                 # find max_freq
                 total = 0
                 for inner_tag in results[stemmed_word]:
-                    total += results[stemmed_word][inner_tag]
+                    total += len(results[stemmed_word][inner_tag])
                 if(total > max):
                     max = total
+                counter += 1
 
         self.content = results
         self.max_freq = max
@@ -71,7 +75,7 @@ class Document:
         try:
             total = 0
             for tag in self.content[term]:
-                total += self.content[term][tag]
+                total += len(self.content[term][tag])
             return total
         except:
             print("The term: \""+term+"\" can not be found in this document")

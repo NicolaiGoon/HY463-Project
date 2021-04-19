@@ -36,6 +36,7 @@ def analyzeTerms(docs):
                 new_term = Term(word)
                 new_term.setDf(df)
                 terms[word] = new_term
+            terms[word].addAppearance(doc, word)
 
     return terms
 
