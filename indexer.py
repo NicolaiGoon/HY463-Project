@@ -1,9 +1,10 @@
 import pathlib
+import math
 
 
 def index(docs, terms):
     exportVocabulary(terms)
-    exportDocuments(docs)
+    exportDocuments(docs, terms)
 
 
 def exportVocabulary(terms):
@@ -17,7 +18,7 @@ def exportVocabulary(terms):
             VocabularyFile.write(terms[term].id+" "+str(terms[term].df)+"\n")
 
 
-def exportDocuments(docs):
+def exportDocuments(docs, terms):
 
     def custom_sort(doc):
         return doc.id
@@ -27,5 +28,19 @@ def exportDocuments(docs):
     rel_path = pathlib.Path().absolute()
     with open(rel_path.joinpath('CollectionIndex\\DocumentsFile.txt'), 'w', encoding='utf-8') as DocumentFile:
         for doc in docs:
-            DocumentFile.write(doc.id+" "+doc.path+"\n")
+            d = norm(doc, terms, len(docs))
+            DocumentFile.write(doc.id+" "+doc.path+" "+str(d)+"\n")
     return
+
+
+def norm(doc, terms, n):
+    """
+    returns the eucledian distance from point 0 of the vector that represents the document
+    """
+    d = 0
+    for term in doc.content:
+        # calculate weight
+        w = doc.tf(term) * math.log(n/terms[term].df)
+        d += w*w
+    d = math.sqrt(d)
+    return d

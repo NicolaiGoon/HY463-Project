@@ -76,10 +76,5 @@ class Document:
         except:
             print("The term: \""+term+"\" can not be found in this document")
 
-    # to be fixed
-
-    def norm(self):
-        """
-        returns the eucledian distance from point 0 of the vector that represents the document
-        """
-        return 0
+    def tf(self, term):
+        return self.termFreqnuency(term)/self.max_freq
