@@ -5,7 +5,6 @@ MAIN APP
 """
 
 import readxml
-import readFolders
 import analyzer
 import indexer
 
@@ -22,8 +21,8 @@ f = {
     'authors': ['Νίκος Γουνάκης']
 }
 
-res = analyzer.analyzeAllDocs(
-    "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection")
-print("Unique Words: "+str(analyzer.getNumberOfUniqueWords(res)))
+# docs = analyzer.analyzeAllDocs(
+#     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection")
+# print("Unique Words: "+str(analyzer.getNumberOfUniqueWords(res)))
 
-indexer.index(res)
+# indexer.index(docs)

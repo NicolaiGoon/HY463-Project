@@ -29,8 +29,13 @@ def exportDocuments(analyzed):
                 if row not in ids_n_path:
                     ids_n_path.append(row)
         return ids_n_path
-    ids_n_path = getDocIds(analyzed)
 
+    def custom_sort(item):
+        return item["id"]
+
+    ids_n_path = getDocIds(analyzed)
+    # sort by id
+    ids_n_path.sort(key=custom_sort)
     rel_path = pathlib.Path().absolute()
     with open(rel_path.joinpath('CollectionIndex\\DocumentsFile.txt'), 'w', encoding='utf-8') as DocumentFile:
         for entry in ids_n_path:

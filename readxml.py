@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from Document import Document
 
 
 def readFileXML(file):
@@ -69,8 +70,7 @@ def readFileXML(file):
             categories_list.append(getDescendantsText(category).strip())
         # print('categories: '+str(categories_list))
 
-        document = {
-            "pmc_id": pmc_id,
+        doc = Document(pmc_id, file, {
             "title": title,
             "abstract": abstract,
             "body": body,
@@ -78,9 +78,9 @@ def readFileXML(file):
             "publisher": publisher,
             "authors": authors_list,
             "categories": categories_list
-        }
+        })
 
-        return document
+        return doc
 
 
 def getDescendantsText(node):
