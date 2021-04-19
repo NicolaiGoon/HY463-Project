@@ -21,8 +21,10 @@ f = {
     'authors': ['Νίκος Γουνάκης']
 }
 
-# docs = analyzer.analyzeAllDocs(
-#     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection")
-# print("Unique Words: "+str(analyzer.getNumberOfUniqueWords(res)))
+docs = analyzer.analyzeAllDocs(
+    "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection")
+terms = analyzer.getUniqueTerms(docs)
 
-# indexer.index(docs)
+print("Total docs: "+str(len(docs))+"\nTotal terms: "+str(len(terms)))
+
+indexer.index(docs, terms)

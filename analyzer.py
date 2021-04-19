@@ -2,13 +2,13 @@ import collections
 import tokenizer
 import readxml
 import os
+from Term import Term
 
 
 def analyzeAllDocs(folder):
     """
     Reads all docs in a folder and for each word calculates its appearance in each tag of a document
     """
-    unique_words = []
     docs = []
 
     # read all files in folder
@@ -20,9 +20,24 @@ def analyzeAllDocs(folder):
                 continue
             doc = readxml.readFileXML(path)
             docs.append(doc)
-            return
 
     return docs
+
+
+def getUniqueTerms(docs):
+    terms = {}
+    for doc in docs:
+        for word in doc.content:
+            df = doc.termFreqnuency(word)
+            # find if term exists
+            if word in terms:
+                terms[word].setDf(terms[word].df + df)
+            else:
+                new_term = Term(word)
+                new_term.setDf(df)
+                terms[word] = new_term
+
+    return terms
 
 
 def getNumberOfUniqueWords(analyzed):

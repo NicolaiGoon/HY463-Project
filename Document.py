@@ -15,8 +15,6 @@ class Document:
         self.content = content
         self.tokenizeTags()
         self.calculateFrequencies()
-        print(self.content)
-        print(self.max_freq)
 
     def tokenizeTags(self):
         """
@@ -69,7 +67,17 @@ class Document:
         self.content = results
         self.max_freq = max
 
+    def termFreqnuency(self, term):
+        try:
+            total = 0
+            for tag in self.content[term]:
+                total += self.content[term][tag]
+            return total
+        except:
+            print("The term: \""+term+"\" can not be found in this document")
+
     # to be fixed
+
     def norm(self):
         """
         returns the eucledian distance from point 0 of the vector that represents the document
