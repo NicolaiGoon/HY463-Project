@@ -24,7 +24,7 @@ def analyzeAllDocs(folder):
     return docs
 
 
-def getUniqueTerms(docs):
+def analyzeTerms(docs):
     terms = {}
     for doc in docs:
         for word in doc.content:

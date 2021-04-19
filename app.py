@@ -7,6 +7,7 @@ MAIN APP
 import readxml
 import analyzer
 import indexer
+import time
 
 doc = readxml.readFileXML(
     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection\\diagnosis\\Topic_1\\0\\1852545.nxml")
@@ -21,10 +22,19 @@ f = {
     'authors': ['Νίκος Γουνάκης']
 }
 
-docs = analyzer.analyzeAllDocs(
-    "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection")
-terms = analyzer.getUniqueTerms(docs)
 
-print("Total docs: "+str(len(docs))+"\nTotal terms: "+str(len(terms)))
+def startIndexing():
+    # measure time
+    start = time.time()
 
-indexer.index(docs, terms)
+    # indexing
+    docs = analyzer.analyzeAllDocs(
+        "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection")
+    terms = analyzer.analyzeTerms(docs)
+    sorted_terms = sorted(terms.keys())
+    indexer.index(docs, terms, sorted_terms)
+
+    print("Total docs: "+str(len(docs))+"\nTotal terms: " +
+          str(len(terms))+"\nTotal Time: "+str(time.time()-start))
+
+startIndexing()
