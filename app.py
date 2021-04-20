@@ -10,6 +10,7 @@ from src.Model import indexer
 import time
 from src.Model.Document import Document
 import sys
+import pathlib
 
 # doc = readxml.readFileXML(
 #     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection\\diagnosis\\Topic_1\\0\\1852545.nxml")
@@ -37,13 +38,12 @@ def testIndexing():
           str(len(terms))+"\nTotal Time: "+str(time.time()-start))
 
 
-def startIndexing():
+def startIndexing(folder):
     # measure time
     start = time.time()
 
     # indexing
-    docs = analyzer.analyzeAllDocs(
-        "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection")
+    docs = analyzer.analyzeAllDocs(folder)
     terms = analyzer.analyzeTerms(docs)
     sorted_terms = sorted(terms.keys())
     indexer.index(docs, terms, sorted_terms)
@@ -55,7 +55,8 @@ def startIndexing():
 try:
     arg = sys.argv[1]
     if arg == '-index':
-        startIndexing()
+        folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
+        startIndexing(folder)
     elif arg == '-test-index':
         testIndexing()
     elif arg == '-query':
