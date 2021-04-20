@@ -12,7 +12,8 @@ class Vocabulary:
         # path to VocabularyFile.txt
         file = pathlib.Path().absolute().joinpath(
             "CollectionIndex\\VocabularyFile.txt")
-        file = "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\CollectionIndex\\VocabularyFile.txt"
+        # linecache needs str filename
+        file = str(file)
 
         line_number = 1
         while True:
