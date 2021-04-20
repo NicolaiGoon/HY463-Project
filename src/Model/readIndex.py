@@ -6,6 +6,8 @@ def getIndexLineToknized(type, line_number):
     """
     returns a tokenized line from a file in CollectionIndex
     """
+    if type != 'Vocabulary' and type != 'Posting' and type != 'Documents':
+        raise Exception('Invalid Prameter type: '+type)
     file = pathlib.Path().absolute().joinpath(
         "CollectionIndex\\" + type + "File.txt")
     # convert to str
