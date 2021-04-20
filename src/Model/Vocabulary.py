@@ -34,3 +34,9 @@ class Vocabulary:
             self.id = tokenized_line[0]
             self.df = int(tokenized_line[1])
             self.PostingPointer = int(tokenized_line[2])
+
+        def display(self):
+            print('------ Vocabulary Entry ---------')
+            print('ID: '+str(self.id)+'\nDF: '+str(self.df) +
+                  '\nPostingPointer: '+str(self.PostingPointer))
+            print('---------------------------------')
