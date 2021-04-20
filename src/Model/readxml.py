@@ -25,6 +25,8 @@ def readFileXML(file):
         # find title
         title = root.find('.//article-title')
         title = title.text
+        if(title == None):
+            title = ''
         # print("Title: "+title)
 
         # find abstract
