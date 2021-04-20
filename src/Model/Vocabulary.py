@@ -1,5 +1,5 @@
-import linecache
 import pathlib
+from src.Model import readIndex
 
 
 class Vocabulary:
@@ -17,14 +17,11 @@ class Vocabulary:
 
         line_number = 1
         while True:
-            line = linecache.getline(file, line_number)
+            line = readIndex.getIndexLineToknized('Vocabulary', line_number)
             line_number += 1
             if line == '':
                 break
-            # remove '\n'
-            line = line.replace('\n', '')
-            # tokenize
-            line = line.split('\t')
+
             entry = self.VocabularyEntry(line)
             self.entries[entry.id] = entry
 
