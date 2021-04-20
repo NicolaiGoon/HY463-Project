@@ -36,7 +36,7 @@ def exportVocabulary(terms, sorted_terms, post_map):
     contains all different words in increasing lexicographic order and their document frequency
     """
     rel_path = pathlib.Path().absolute()
-    with open(rel_path.joinpath('CollectionIndex\\Vocabulary.txt'), 'w', encoding='utf-8') as VocabularyFile:
+    with open(rel_path.joinpath('CollectionIndex\\VocabularyFile.txt'), 'w', encoding='utf-8') as VocabularyFile:
         for term in sorted_terms:
             s = terms[term].id+'\t' + \
                 str(terms[term].df)+'\t'+str(post_map[term])+'\n'
