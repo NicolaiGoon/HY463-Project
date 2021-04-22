@@ -10,11 +10,14 @@ class Posting:
     def __init__(self, line_pointer):
         tokens = readIndex.getIndexLineToknized('Posting', line_pointer)
         if tokens == '':
-            raise Exception('Invalid line pointer: '+line_pointer)
+            self.stop = True
+            return
+        self.stop = False
         self.doc_id = int(tokens[0])
         self.tf = float(tokens[1])
         self.appearances = ast.literal_eval(tokens[2])
         self.DocumentPointer = int(tokens[3])
+        
 
     def display(self):
         print('---------- Posting Entry --------')

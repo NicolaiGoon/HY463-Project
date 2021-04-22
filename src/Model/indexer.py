@@ -20,13 +20,14 @@ def exportPosting(docs, terms, sorted_terms, doc_map):
     with open(rel_path.joinpath('CollectionIndex\\PostingFile.txt'), 'w', encoding='utf-8') as PostingFile:
         for term in sorted_terms:
             post_map[term] = counter
-            for doc in docs:
-                if terms[term].id in doc.content:
-                    counter += 1
-                    s = str(doc.id) + '\t' + str(doc.tf(term)) + \
-                        '\t' + str(terms[term].appearances[doc.id]) + \
-                        '\t' + str(doc_map[doc.id]) + '\n'
-                    PostingFile.write(s)
+            for doc in terms[term].appearances:
+                counter += 1
+                s = str(docs[doc].id) + '\t' + str(docs[doc].tf(term)) + \
+                    '\t' + str(terms[term].appearances[docs[doc].id]) + \
+                    '\t' + str(doc_map[docs[doc].id]) + '\n'
+                PostingFile.write(s)
+            PostingFile.write('\n')
+            counter += 1
     return post_map
 
 
@@ -44,25 +45,22 @@ def exportVocabulary(terms, sorted_terms, post_map):
 
 
 def exportDocuments(docs, terms):
-
-    def custom_sort(doc):
-        return doc.id
-
     # maps a document with the line in the file
     doc_map = {}
     counter = 1
 
     # sort by id
-    docs.sort(key=custom_sort)
+    sorted_docs = sorted(docs.keys())
+
     rel_path = pathlib.Path().absolute()
     with open(rel_path.joinpath('CollectionIndex\\DocumentsFile.txt'), 'w', encoding='utf-8') as DocumentFile:
-        for doc in docs:
+        for doc in sorted_docs:
             # mapping
-            doc_map[doc.id] = counter
+            doc_map[docs[doc].id] = counter
             counter += 1
 
-            d = norm(doc, terms, len(docs))
-            DocumentFile.write(doc.id+"\t"+doc.path+"\t"+str(d)+"\n")
+            d = norm(docs[doc], terms, len(docs))
+            DocumentFile.write(docs[doc].id+"\t"+docs[doc].path+"\t"+str(d)+"\n")
     return doc_map
 
 
