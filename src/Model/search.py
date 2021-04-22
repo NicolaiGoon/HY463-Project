@@ -1,32 +1,37 @@
 from src.Model.Vocabulary import Vocabulary
 from src.Model.Posting import Posting
 from src.Model.DocumentFileEntry import DocumentFileEntry
-
+from src.Model.Document import Document
 
 def search(query):
+    # load vocabulary
     vocab = Vocabulary().entries
-    pointer = vocab[query].PostingPointer
+    # query is represented as a document
+    query = Document(0,'Query',{'body' : query})
+    docs = {}
+    # find documents for every word
+    for word in query.content:
+        try:
+            term = vocab[word]
+        except:
+            continue
+        docs = getDocsOfTerm(docs,term)
     
-    
-    #posts = getPosts(pointer,vocab,query)
-    posts = getPostsV2(pointer)
+    return docs
 
+# def getPosts(pointer,vocab,query):
+#     posts = []
+#     n = next_key(vocab,query)
+#     end_pointer = vocab[n].PostingPointer
+#     while True:
+#         if pointer == end_pointer - 1: 
+#             break
+#         post = Posting(pointer)
+#         posts.append(post)
+#         pointer += 1
+#     return posts
 
-    return getDocs(posts)
-
-def getPosts(pointer,vocab,query):
-    posts = []
-    n = next_key(vocab,query)
-    end_pointer = vocab[n].PostingPointer
-    while True:
-        if pointer == end_pointer - 1: 
-            break
-        post = Posting(pointer)
-        posts.append(post)
-        pointer += 1
-    return posts
-
-def getPostsV2(pointer):
+def getPosts(pointer):
     posts = []
     while True:
         post = Posting(pointer)
@@ -36,8 +41,8 @@ def getPostsV2(pointer):
         pointer += 1
     return posts
 
-def getDocs(posts):
-    docs = {}
+def getDocsOfTerm(docs,term):
+    posts = getPosts(term.PostingPointer)
     for post in posts:
         doc = DocumentFileEntry(post.DocumentPointer)
         docs[doc.id] = doc
