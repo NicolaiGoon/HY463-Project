@@ -11,6 +11,7 @@ import time
 from src.Model.Document import Document
 import sys
 import pathlib
+from src.Model import search
 
 # doc = readxml.readFileXML(
 #     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection\\diagnosis\\Topic_1\\0\\1852545.nxml")
@@ -52,16 +53,28 @@ def startIndexing(folder):
           str(len(terms))+"\nTotal Time: "+str(time.time()-start))
 
 
-try:
-    arg = sys.argv[1]
-    if arg == '-index':
-        folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
-        startIndexing(folder)
-    elif arg == '-test-index':
-        testIndexing()
-    elif arg == '-query':
-        print('to be implemented')
-    else:
-        print("Invalid arguments")
-except:
-    print("Please provide argument")
+if len(sys.argv) < 2:
+    print("No arguments given")
+    exit(-1)
+arg = sys.argv[1]
+if arg == '-index':
+    folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
+    #folder = 'D:\\MedicalCollection\\00'
+    startIndexing(folder)
+elif arg == '-test-index':
+    testIndexing()
+elif arg == '-query':
+    if len(sys.argv) < 3:
+        print('No query given')
+        exit(-1)
+    query = sys.argv[2]
+    # measure time
+    start = time.time()
+    docs = search.search(query)
+    end = time.time() - start
+    print('Total docs: '+str(len(docs)))
+    print('Query time: '+str(end))
+
+else:
+    print("Invalid arguments")
+    exit(-1)
