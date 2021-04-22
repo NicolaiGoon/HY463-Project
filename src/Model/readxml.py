@@ -20,33 +20,41 @@ def readFileXML(file):
         for id in ids:
             if id.attrib["pub-id-type"] == 'pmc':
                 pmc_id = id.text
-        # print("Pmcid: "+pmc_id)
+        #print("Pmcid: "+pmc_id)
 
         # find title
         title = root.find('.//article-title')
         title = title.text
-        if(title == None):
+        if title == None:
             title = ''
         # print("Title: "+title)
 
         # find abstract
         abstr = root.find('.//abstract')
         abstract = getDescendantsText(abstr)
+        if abstract == None:
+            abstract = ''
         # print("Abstract: "+abstract)
 
         # find body
         body = root.find('.//body')
         body = getDescendantsText(body)
+        if body == None:
+            body = ''
         # print('Body: '+body)
 
         # find journal
         journal = root.find('.//journal-title')
         journal = getDescendantsText(journal)
+        if journal == None:
+            journal = ''
         # print('journal: '+journal)
 
         # find publisher
         publisher = root.find('.//publisher-name')
         publisher = getDescendantsText(publisher)
+        if publisher == None:
+            publisher = ''
         # print('publisher: '+publisher)
 
         # find authors
@@ -60,8 +68,13 @@ def readFileXML(file):
                     for elem in author.iter():
                         if elem.tag == 'name':
                             # get name and surname
-                            author_item += elem[0].text.strip() + \
-                                ' ' + elem[1].text.strip()
+                            name = ''
+                            surname = ''
+                            if len(elem) > 0 and isinstance(elem[0].text, str):
+                                name = elem[0].text.strip()
+                            if len(elem) > 1 and isinstance(elem[1].text, str):
+                                surname = elem[1].text.strip()
+                            author_item += name + ' ' + surname
                     authors_list.append(author_item)
         # print("authors: "+str(authors_list))
 
@@ -69,10 +82,13 @@ def readFileXML(file):
         categories = root.find('.//article-categories')
         categories_list = []
         for category in categories:
-            categories_list.append(getDescendantsText(category).strip())
+            if category == None:
+                categories_list.append('')
+            else:
+                categories_list.append(getDescendantsText(category).strip())
         # print('categories: '+str(categories_list))
 
-        doc = Document(pmc_id, file, {
+        obj = {
             "title": title,
             "abstract": abstract,
             "body": body,
@@ -80,7 +96,9 @@ def readFileXML(file):
             "publisher": publisher,
             "authors": authors_list,
             "categories": categories_list
-        })
+        }
+
+        doc = Document(pmc_id, file, obj)
 
         return doc
 
