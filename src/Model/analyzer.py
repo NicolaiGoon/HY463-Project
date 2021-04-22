@@ -9,7 +9,7 @@ def analyzeAllDocs(folder):
     """
     Reads all docs in a folder and for each word calculates its appearance in each tag of a document
     """
-    docs = []
+    docs = {}
 
     # read all files in folder
     for root, dirs, files in os.walk(folder):
@@ -19,7 +19,7 @@ def analyzeAllDocs(folder):
             if path[-5:] != '.nxml':
                 continue
             doc = readxml.readFileXML(path)
-            docs.append(doc)
+            docs[doc.id] = doc
 
     return docs
 
@@ -27,19 +27,19 @@ def analyzeAllDocs(folder):
 def analyzeTerms(docs):
     terms = {}
     for doc in docs:
-        for word in doc.content:
-            df = doc.termFreqnuency(word)
+        # keep words that df is rised
+        set = {}
+        for word in docs[doc].content:
             # find if term exists
-            if word in terms:
-                terms[word].setDf(terms[word].df + df)
+            if word in terms and word not in set:
+                terms[word].setDf(terms[word].df + 1)
             else:
                 new_term = Term(word)
-                new_term.setDf(df)
+                new_term.setDf(1)
                 terms[word] = new_term
-            terms[word].addAppearance(doc, word)
+            terms[word].addAppearance(docs[doc], word)
 
     return terms
-
 
 def getNumberOfUniqueWords(analyzed):
     """
