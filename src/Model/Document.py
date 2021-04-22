@@ -15,7 +15,6 @@ class Document:
         self.content = content
         self.tokenizeTags()
         self.calculateFrequencies()
-       
 
     def tokenizeTags(self):
         """
@@ -31,7 +30,7 @@ class Document:
                     tokens += tokenizer.tokenize(s)
             else:
                 raise Exception(
-                    'Doc object must have values of string or array of strings')
+                    'Doc object must have values of string or array of strings\nTag: '+tag+'\t'+str(self.content[tag]))
             tag_tokenized[tag] = tokens
         self.content = tag_tokenized
 
