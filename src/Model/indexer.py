@@ -1,12 +1,19 @@
 import pathlib
-import math
-
+from src.Model import Utilities
 
 def index(docs, terms, sorted_terms):
+    exportCollectionSize(len(docs))
     doc_map = exportDocuments(docs, terms)
     post_map = exportPosting(docs, terms, sorted_terms, doc_map)
     exportVocabulary(terms, sorted_terms, post_map)
 
+def exportCollectionSize(size):
+    '''
+    exports collection size in `size.txt`
+    '''
+    rel_path = pathlib.Path().absolute()
+    with open(rel_path.joinpath('CollectionIndex\\size.txt'),'w',encoding='utf-8') as sizeFile:
+        sizeFile.write(str(size))
 
 def exportPosting(docs, terms, sorted_terms, doc_map):
     """
@@ -59,19 +66,6 @@ def exportDocuments(docs, terms):
             doc_map[docs[doc].id] = counter
             counter += 1
 
-            d = norm(docs[doc], terms, len(docs))
+            d = Utilities.norm(docs[doc], terms, len(docs))
             DocumentFile.write(docs[doc].id+"\t"+docs[doc].path+"\t"+str(d)+"\n")
     return doc_map
-
-
-def norm(doc, terms, n):
-    """
-    returns the eucledian distance from point 0 of the vector that represents the document
-    """
-    d = 0
-    for term in doc.content:
-        # calculate weight
-        w = doc.tf(term) * math.log(n/terms[term].df)
-        d += w*w
-    d = math.sqrt(d)
-    return d
