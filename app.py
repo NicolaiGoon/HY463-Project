@@ -70,8 +70,15 @@ elif arg == '-query':
     query = sys.argv[2]
     # measure time
     start = time.time()
+
     docs = search.search(query)
     end = time.time() - start
+
+    # display results
+    print('\n---------- Query Results ------------\n')
+    for doc in docs:
+        doc.display()
+        print()
     print('Total docs: '+str(len(docs)))
     print('Query time: '+str(end))
 
