@@ -18,4 +18,6 @@ class DocumentFileEntry:
         print('----- DocumentFile Entry --------')
         print('ID: '+str(self.id)+'\nPath: ' +
               self.path+'\nNorm: '+str(self.norm))
+        if(self.score):
+            print('Score: '+str(self.score))
         print('---------------------------------')
