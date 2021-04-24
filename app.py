@@ -76,9 +76,9 @@ elif arg == '-test-index':
     testIndexing()
 elif arg == '-query':
     if len(sys.argv) < 3:
-        print('No query given')
-        exit(-1)
-    query = sys.argv[2]
+        query = str(input("Write a query:\n"))
+    else:    
+        query = sys.argv[2]
     # measure time
     start = time.time()
 
