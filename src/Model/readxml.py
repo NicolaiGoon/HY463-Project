@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 from src.Model.Document import Document
-
+import pathlib
+from src.Model.Topic import Topic
 
 def readFileXML(file):
     """
@@ -102,6 +103,26 @@ def readFileXML(file):
 
         return doc
 
+
+def readTopic():
+    '''
+    read all topics from topics.xml and returns them as an array of topic objects
+    '''
+    file = pathlib.Path().absolute().joinpath(
+        'Resources\\Resources Corpus\\topics.xml')
+    with open(file, 'r', encoding='utf-8') as topicfile:
+        xml_tree = ET.parse(topicfile)
+        root = xml_tree.getroot()
+
+        topics = root.findall('.//topic')
+        topic_array = []
+        for topic in topics:
+            description = topic.find('./description')
+            summary = topic.find('./summary')
+            topic_type = topic.attrib['type']
+            t = Topic(topic_type,description.text,summary.text)
+            topic_array.append(t)
+    return topic_array
 
 def getDescendantsText(node):
     '''
