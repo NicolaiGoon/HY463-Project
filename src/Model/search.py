@@ -6,13 +6,10 @@ from src.Model import Utilities
 import operator
 
 
-def search(query):
+def search(vocab,query):
     '''
     returns the docs that match the query words
     '''
-    # load vocabulary
-    vocab = Vocabulary().entries
-
     # query is represented as a document
     query = Document(0, 'Query', {'body': query})
     
