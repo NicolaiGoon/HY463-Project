@@ -12,7 +12,7 @@ def analyzeAllDocs(folder):
     docs = {}
 
     # read all files in folder
-    with alive_bar(title='Reading Documents:', bar='classic') as bar:
+    with alive_bar(title='Reading Documents:',unknown="classic") as bar:
         for root, dirs, files in os.walk(folder):
             for file in files:
                 path = os.path.join(root, file)
@@ -28,7 +28,7 @@ def analyzeAllDocs(folder):
 
 def analyzeTerms(docs):
     terms = {}
-    with alive_bar(title='Reading Terms:', bar='classic') as bar:
+    with alive_bar(title='Reading Terms:', unknown='classic') as bar:
         for doc in docs:
             # keep words that df is rised
             set = {}
