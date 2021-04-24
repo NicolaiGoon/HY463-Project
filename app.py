@@ -12,6 +12,7 @@ from src.Model.Document import Document
 import sys
 import pathlib
 from src.Model import search
+from src.Model.Vocabulary import Vocabulary
 
 # doc = readxml.readFileXML(
 #     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection\\diagnosis\\Topic_1\\0\\1852545.nxml")
@@ -42,7 +43,7 @@ def testIndexing():
 def startIndexing(folder):
     # measure time
     start = time.time()
-    tmp_time =  time.time()
+    tmp_time = time.time()
     # analyze docs
     print("Starting Doc analysis ...")
     docs = analyzer.analyzeAllDocs(folder)
@@ -69,29 +70,38 @@ if len(sys.argv) < 2:
     exit(-1)
 arg = sys.argv[1]
 if arg == '-index':
-    folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
-    #folder = 'D:\\MedicalCollection\\00'
+    #folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
+    folder = 'D:\\MedicalCollection\\00'
     startIndexing(folder)
 elif arg == '-test-index':
     testIndexing()
 elif arg == '-query':
     if len(sys.argv) < 3:
         query = str(input("Write a query:\n"))
-    else:    
+    else:
         query = sys.argv[2]
-    # measure time
-    start = time.time()
 
-    docs = search.search(query)
-    end = time.time() - start
+    # load vocabulary
+    vocab = Vocabulary().entries
+    first_time = True
+    while True:
+        if not first_time:
+            query = str(input("Write a query:\n"))
+        # measure time
+        start = time.time()
 
-    # display results
-    print('\n---------- Query Results ------------\n')
-    for doc in docs:
-        doc.display()
-        print()
-    print('Total docs: '+str(len(docs)))
-    print('Query time: '+str(end))
+        docs = search.search(vocab, query)
+        end = time.time() - start
+
+        # display results
+        print('\n---------- Query Results ------------\n')
+        for doc in docs:
+            doc.display()
+            print()
+        print('Total docs: '+str(len(docs)))
+        print('Query time: '+str(end))
+        print('---------------------------------\n')
+        first_time = False
 
 else:
     print("Invalid arguments")
