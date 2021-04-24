@@ -13,6 +13,7 @@ import sys
 import pathlib
 from src.Model import search
 from src.Model.Vocabulary import Vocabulary
+import PySimpleGUI as sg
 
 # doc = readxml.readFileXML(
 #     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection\\diagnosis\\Topic_1\\0\\1852545.nxml")
@@ -41,6 +42,7 @@ def testIndexing():
 
 
 def startIndexing(folder):
+    print("**********************")
     # measure time
     start = time.time()
     tmp_time = time.time()
@@ -57,12 +59,14 @@ def startIndexing(folder):
     print("Term analysis finished\tTime: "+str(time.time()-tmp_time))
     print("----------------------")
     # indexing
+    tmp_time = time.time()
     print("Start Indexing ...")
     indexer.index(docs, terms, sorted_terms)
-
+    print("Indexing finished\tTime: "+str(time.time()-tmp_time))
+    print("----------------------")
     print("Total docs: "+str(len(docs))+"\nTotal terms: " +
           str(len(terms))+"\nTotal Time: "+str(time.time()-start))
-    print("----------------------")
+    print("**********************")
 
 
 if len(sys.argv) < 2:
@@ -70,8 +74,8 @@ if len(sys.argv) < 2:
     exit(-1)
 arg = sys.argv[1]
 if arg == '-index':
-    #folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
-    folder = 'D:\\MedicalCollection\\00'
+    folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
+    #folder = 'D:\\MedicalCollection\\00'
     startIndexing(folder)
 elif arg == '-test-index':
     testIndexing()
