@@ -42,15 +42,26 @@ def testIndexing():
 def startIndexing(folder):
     # measure time
     start = time.time()
-
-    # indexing
+    tmp_time =  time.time()
+    # analyze docs
+    print("Starting Doc analysis ...")
     docs = analyzer.analyzeAllDocs(folder)
+    print("Doc analysis finished\tTime: "+str(time.time()-tmp_time))
+    print("----------------------")
+    # analyze terms
+    tmp_time = time.time()
+    print("Starting Term analysis ...")
     terms = analyzer.analyzeTerms(docs)
     sorted_terms = sorted(terms.keys())
+    print("Term analysis finished\tTime: "+str(time.time()-tmp_time))
+    print("----------------------")
+    # indexing
+    print("Start Indexing ...")
     indexer.index(docs, terms, sorted_terms)
 
     print("Total docs: "+str(len(docs))+"\nTotal terms: " +
           str(len(terms))+"\nTotal Time: "+str(time.time()-start))
+    print("----------------------")
 
 
 if len(sys.argv) < 2:

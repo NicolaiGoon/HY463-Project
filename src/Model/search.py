@@ -27,7 +27,6 @@ def search(query):
         try:
             term = vocab[word]
         except:
-            print(word)
             continue
         posts = getPosts(term, posts)
     
@@ -46,7 +45,7 @@ def getScore(doc, query, vocab, posts):
     '''
     add scores to the document
     '''
-    print(Utilities.CosSim(doc, query, vocab, posts))
+    Utilities.CosSim(doc, query, vocab, posts)
     return doc
 
 
