@@ -43,7 +43,7 @@ def testIndexing():
 
 def startIndexing(folder):
     print("**********************")
-    # measure time
+    # measudoc_type
     start = time.time()
     tmp_time = time.time()
     # analyze docs
@@ -69,44 +69,44 @@ def startIndexing(folder):
     print("**********************")
 
 
-if len(sys.argv) < 2:
-    print("No arguments given")
-    exit(-1)
-arg = sys.argv[1]
+arg = ''
+if len(sys.argv) > 1:
+    arg = sys.argv[1]
+
 if arg == '-index':
     folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
     #folder = 'D:\\MedicalCollection\\00'
     startIndexing(folder)
 elif arg == '-test-index':
     testIndexing()
-elif arg == '-query':
-    if len(sys.argv) < 3:
-        query = str(input("Write a query:\n"))
-    else:
-        query = sys.argv[2]
+else:
+
+    types = {1: 'diagnosis', 2: 'test', 3: 'treatment'}
 
     # load vocabulary
     vocab = Vocabulary().entries
-    first_time = True
+
     while True:
-        if not first_time:
-            query = str(input("Write a query:\n"))
+        print('********** START EVALUATION ***********')
+        doc_type = int(
+            input("Select type:\ndiagnosis: 1\ntest: 2\ntreatment: 3\n"))
+        query = str(input("Write a summary or a description:\n"))
+
         # measure time
         start = time.time()
 
         docs = search.search(vocab, query)
         end = time.time() - start
+        previous = len(docs)
+        # filter docs by topic
+        docs = search.filterDocType(types[doc_type], docs)
 
         # display results
         print('\n---------- Query Results ------------\n')
         for doc in docs:
-            doc.display()
-            print()
-        print('Total docs: '+str(len(docs)))
+             doc.display()
+             print()
+        print('Total docs: '+str(previous))
+        print('After filter in '+types[doc_type]+': '+str(len(docs)))
         print('Query time: '+str(end))
         print('---------------------------------\n')
-        first_time = False
-
-else:
-    print("Invalid arguments")
-    exit(-1)

@@ -6,13 +6,13 @@ from src.Model import Utilities
 import operator
 
 
-def search(vocab,query):
+def search(vocab, query):
     '''
     returns the docs that match the query words
     '''
     # query is represented as a document
     query = Document(0, 'Query', {'body': query})
-    
+
     # for every term , contains the posts
     posts = {}
 
@@ -26,7 +26,7 @@ def search(vocab,query):
         except:
             continue
         posts = getPosts(term, posts)
-    
+
     for doc_id in posts:
         # take the doc pointer from the first term post
         doc_pointer = posts[doc_id][next(iter(posts[doc_id]))].DocumentPointer
@@ -57,3 +57,26 @@ def getPosts(term, posts={}):
         posts[post.doc_id][term.id] = post
         pointer += 1
     return posts
+
+
+def filterDocType(doc_type, docs):
+    '''
+    returns the docs that belongs to a specific type
+    those docs must be in one of the following folder:
+    * diagnosis
+    * test
+    * treatment
+    '''
+    def checkType(path, t):
+        '''
+        determines if the document is type t using the path
+        '''
+        tokens = path.split('\\')
+        if t in tokens:
+            return True
+        else:
+            return False
+    for doc in docs:
+        if not checkType(doc.path,doc_type):
+            docs.remove(doc)
+    return docs
