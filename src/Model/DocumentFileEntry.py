@@ -17,7 +17,9 @@ class DocumentFileEntry:
     def display(self):
         print('----- DocumentFile Entry --------')
         print('ID: '+str(self.id)+'\nPath: ' +
-              self.path+'\nNorm: '+str(self.norm))
+              self.path)
         if(self.score):
             print('Score: '+str(self.score))
+        else:
+            print('Norm: '+str(self.norm))
         print('---------------------------------')
