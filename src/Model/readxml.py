@@ -2,6 +2,8 @@ import xml.etree.ElementTree as ET
 from src.Model.Document import Document
 import pathlib
 from src.Model.Topic import Topic
+from src.Model import tokenizer
+
 
 def readFileXML(file):
     """
@@ -90,13 +92,13 @@ def readFileXML(file):
         # print('categories: '+str(categories_list))
 
         obj = {
-            "title": title,
-            "abstract": abstract,
-            "body": body,
-            "journal": journal,
-            "publisher": publisher,
-            "authors": authors_list,
-            "categories": categories_list
+            "title": tokenizer.tokenize(title),
+            "abstract": tokenizer.tokenize(abstract),
+            "body": tokenizer.tokenize(body),
+            "journal": tokenizer.tokenize(journal),
+            "publisher": tokenizer.tokenize(publisher),
+            "authors": tokenizer.tokenize(authors_list),
+            "categories": tokenizer.tokenize(categories_list)
         }
 
         doc = Document(pmc_id, file, obj)
@@ -120,9 +122,10 @@ def readTopic():
             description = topic.find('./description')
             summary = topic.find('./summary')
             topic_type = topic.attrib['type']
-            t = Topic(topic_type,description.text,summary.text)
+            t = Topic(topic_type, description.text, summary.text)
             topic_array.append(t)
     return topic_array
+
 
 def getDescendantsText(node):
     '''

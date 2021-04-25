@@ -42,14 +42,16 @@ def removeStopWords(tokens):
     return res
 
 
-def tokenize(str):
+def tokenize(s):
     """
     Tokenizes string s
     """
-    res = str
-    # get rid of punctuation  , make lower case , tokenize every word
-    res = res.translate(str.maketrans(string.punctuation,
-                                      ' '*len(string.punctuation))).lower().split()
-    res = removeStopWords(res)
+    res = s
+    if isinstance(s, list):
+        res = '-'.join(s)
 
+    # get rid of punctuation  , make lower case , tokenize every word
+    res = re.sub(r'\W+', ' ', res).lower().split()
+    res = removeStopWords(res)
+    
     return res

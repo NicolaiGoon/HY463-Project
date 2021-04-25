@@ -13,26 +13,7 @@ class Document:
         self.id = id
         self.path = path
         self.content = content
-        self.tokenizeTags()
         self.calculateFrequencies()
-
-    def tokenizeTags(self):
-        """
-        tokenizes each tag of the doc
-        """
-        tag_tokenized = {}
-        for tag in self.content:
-            tokens = []
-            if isinstance(self.content[tag], str):
-                tokens = tokenizer.tokenize(self.content[tag])
-            elif isinstance(self.content[tag], list):
-                for s in self.content[tag]:
-                    tokens += tokenizer.tokenize(s)
-            else:
-                raise Exception(
-                    'Doc object must have values of string or array of strings\nTag: '+tag+'\t'+str(self.content[tag]))
-            tag_tokenized[tag] = tokens
-        self.content = tag_tokenized
 
     def calculateFrequencies(self):
         """
