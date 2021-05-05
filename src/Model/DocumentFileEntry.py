@@ -6,8 +6,8 @@ class DocumentFileEntry:
     class representing an entry to DocumentsFile.txt
     """
 
-    def __init__(self, line_pointer):
-        tokens = readIndex.getIndexLineToknized('Documents', line_pointer)
+    def __init__(self, line_pointer, file='Documents'):
+        tokens = readIndex.getIndexLineToknized(file, line_pointer)
         if tokens == '':
             raise Exception('Invalid line pointer: '+line_pointer)
         self.id = int(tokens[0])
@@ -18,7 +18,7 @@ class DocumentFileEntry:
         print('----- DocumentFile Entry --------')
         print('ID: '+str(self.id)+'\nPath: ' +
               self.path)
-        if(self.score):
+        if(hasattr(self, 'score')):
             print('Score: '+str(self.score))
         else:
             print('Norm: '+str(self.norm))
