@@ -13,7 +13,7 @@ import sys
 import pathlib
 from src.Model import search
 from src.Model.Vocabulary import Vocabulary
-import PySimpleGUI as sg
+from src.View import Menu
 
 # doc = readxml.readFileXML(
 #     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection\\diagnosis\\Topic_1\\0\\1852545.nxml")
@@ -90,14 +90,22 @@ arg = ''
 if len(sys.argv) > 1:
     arg = sys.argv[1]
 
-folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
+#folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
 #folder = 'D:\\MedicalCollection\\00'
 
-# normal indexing , really fast , requires lot of ram
+# normal indexing , really fast , requires lots of ram
 if arg == '-index':
+    folder = Menu.selectIndexingFolder()
+    if folder == '':
+        print('No folder selected for indexing\nexiting ...')
+        exit(-1)
     startIndexing(folder)
 # partial indexing , slow , requires a lot less ram
 elif arg == '-pindex':
+    folder = Menu.selectIndexingFolder()
+    if folder == '':
+        print('No folder selected for indexing\nexiting ...')
+        exit(-1)
     startPartialIndexing(folder)
 elif arg == '-test-index':
     testIndexing()
