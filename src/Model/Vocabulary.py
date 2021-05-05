@@ -1,5 +1,6 @@
 import pathlib
 from src.Model import readIndex
+from alive_progress import alive_bar
 
 
 class Vocabulary:
@@ -16,14 +17,16 @@ class Vocabulary:
         file = str(file)
 
         line_number = 1
-        while True:
-            line = readIndex.getIndexLineToknized('Vocabulary', line_number)
-            line_number += 1
-            if line == '':
-                break
-
-            entry = self.VocabularyEntry(line)
-            self.entries[entry.id] = entry
+        with alive_bar(title='Loading Vocabulary:', unknown="classic") as bar:
+            while True:
+                line = readIndex.getIndexLineToknized(
+                    'Vocabulary', line_number)
+                line_number += 1
+                if line == '':
+                    break
+                entry = self.VocabularyEntry(line)
+                self.entries[entry.id] = entry
+                bar()
 
     class VocabularyEntry:
         """
