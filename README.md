@@ -7,5 +7,5 @@
 
 
 ## TODO
-- [] tokenize , remove stopwords and do stemming the moment the document is read.
+- [x] tokenize , remove stopwords and do stemming the moment the document is read.
 - [x] remove non-alpharithmetic characters
