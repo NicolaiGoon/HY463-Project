@@ -7,8 +7,8 @@ class Posting:
     represents a posting entry from PostingFile.txt
     """
 
-    def __init__(self, line_pointer):
-        tokens = readIndex.getIndexLineToknized('Posting', line_pointer)
+    def __init__(self, line_pointer, file='Posting'):
+        tokens = readIndex.getIndexLineToknized(file, line_pointer)
         if tokens == '':
             self.stop = True
             return
@@ -17,7 +17,6 @@ class Posting:
         self.tf = float(tokens[1])
         self.appearances = ast.literal_eval(tokens[2])
         self.DocumentPointer = int(tokens[3])
-        
 
     def display(self):
         print('---------- Posting Entry --------')
