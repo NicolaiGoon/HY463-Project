@@ -41,6 +41,23 @@ def testIndexing():
           str(len(terms))+"\nTotal Time: "+str(time.time()-start))
 
 
+def startPartialIndexing(folder):
+    print("**********************")
+    # time
+    start = time.time()
+    tmp_time = time.time()
+    # check memory usage when a document is read
+    print("Starting Doc analysis ...")
+    queue, total = analyzer.analyzeAllDocsPartial(folder)
+    print("Doc analysis finised\tTime: "+str(time.time()-start))
+    print("Starting merging ...")
+    indexer.merge(queue)
+    print("Merging finished\tTime: "+str(time.time()-tmp_time))
+    print("----------------------")
+    print("Total docs: "+str(total)+"\nTotal Time: "+str(time.time()-start))
+    print("**********************")
+
+
 def startIndexing(folder):
     print("**********************")
     # measudoc_type
@@ -73,10 +90,15 @@ arg = ''
 if len(sys.argv) > 1:
     arg = sys.argv[1]
 
+folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
+#folder = 'D:\\MedicalCollection\\00'
+
+# normal indexing , really fast , requires lot of ram
 if arg == '-index':
-    folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
-    #folder = 'D:\\MedicalCollection\\00'
     startIndexing(folder)
+# partial indexing , slow , requires a lot less ram
+elif arg == '-pindex':
+    startPartialIndexing(folder)
 elif arg == '-test-index':
     testIndexing()
 else:
@@ -97,16 +119,12 @@ else:
 
         docs = search.search(vocab, query)
         end = time.time() - start
-        previous = len(docs)
-        # filter docs by topic
-        docs = search.filterDocType(types[doc_type], docs)
 
         # display results
         print('\n---------- Query Results ------------\n')
         for doc in docs:
-             doc.display()
-             print()
-        print('Total docs: '+str(previous))
-        print('After filter in '+types[doc_type]+': '+str(len(docs)))
+            doc.display()
+            print()
+        print('Total docs: '+str(len(docs)))
         print('Query time: '+str(end))
         print('---------------------------------\n')
