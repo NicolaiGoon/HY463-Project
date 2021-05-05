@@ -4,6 +4,7 @@ from src.Model.DocumentFileEntry import DocumentFileEntry
 from src.Model.Document import Document
 from src.Model import Utilities
 import operator
+from src.Model import tokenizer
 
 
 def search(vocab, query):
@@ -11,7 +12,7 @@ def search(vocab, query):
     returns the docs that match the query words
     '''
     # query is represented as a document
-    query = Document(0, 'Query', {'body': query})
+    query = Document(0, 'Query', {'body': tokenizer.tokenize(query)})
 
     # for every term , contains the posts
     posts = {}
