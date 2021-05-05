@@ -53,8 +53,8 @@ def analyzeAllDocsPartial(folder):
                 counter += 1
                 bar()
                 # if 80 is exceeded then write partial index
-                # if(utils.availableMemory() > 80):
-                if counter % random.randint(5, 10) == 0:
+                if(utils.availableMemory() > 80):
+                # if counter % random.randint(5, 10) == 0:
                     partialIndex(docs, i)
                     docs = {}
                     queue.append(str(i))
