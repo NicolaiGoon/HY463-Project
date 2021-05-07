@@ -33,7 +33,6 @@ def removeStopWords(tokens):
     """
     removes greek or english stop words from the array
     """
-    stopwords = readStopWords()
     res = []
     for word in tokens:
         if word not in stopwords:
@@ -53,5 +52,8 @@ def tokenize(s):
     # get rid of punctuation  , make lower case , tokenize every word
     res = re.sub(r'\W+', ' ', res).lower().split()
     res = removeStopWords(res)
-    
+
     return res
+
+
+stopwords = readStopWords()
