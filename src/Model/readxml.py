@@ -27,8 +27,12 @@ def readFileXML(file):
 
         # find title
         title = root.find('.//article-title')
-        title = title.text
-        if title == None:
+        if hasattr(title, "text"):
+            if title.text:
+                title = title.text
+            else:
+                title = ''
+        else:
             title = ''
         # print("Title: "+title)
 
