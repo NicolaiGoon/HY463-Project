@@ -101,6 +101,13 @@ def merge(queue):
     last = False
     if len(queue) == 1:
         rel_path = pathlib.Path().absolute()
+        # remove
+        os.remove(pathlib.Path().absolute().joinpath(
+            'CollectionIndex\\DocumentsFile.txt'))
+        os.remove(pathlib.Path().absolute().joinpath(
+            'CollectionIndex\\PostingFile.txt'))
+        os.remove(pathlib.Path().absolute().joinpath(
+            'CollectionIndex\\VocabularyFile.txt'))
         # rename files
         os.rename(rel_path.joinpath('CollectionIndex\\DocumentsFile1.txt'),
                   rel_path.joinpath('CollectionIndex\\DocumentsFile.txt'))
