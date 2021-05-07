@@ -6,6 +6,7 @@ from src.Model.Vocabulary import Vocabulary
 from src.Model.DocumentFileEntry import DocumentFileEntry
 from src.Model.Posting import Posting
 import os
+import linecache
 
 
 def index(docs, terms, sorted_terms, names={}):
@@ -108,8 +109,11 @@ def merge(queue):
         os.rename(rel_path.joinpath('CollectionIndex\\PostingFile1.txt'),
                   rel_path.joinpath('CollectionIndex\\PostingFile.txt'))
     while len(queue) != 1:
+        linecache.clearcache()
         a = queue.pop(0)
         b = queue.pop(0)
+        if len(queue) == 0:
+            last = True
         doc_map = mergeDocuments(a, b, last)
         mergeVocPost(a, b, doc_map, last)
         queue.append(a+'&'+b)
