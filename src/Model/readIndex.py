@@ -18,10 +18,25 @@ def getIndexLineToknized(type, line_number):
     file = str(file)
     # get line from file
     line = linecache.getline(file, line_number)
+    #line = getLineAlt(file, line_number)
     # replace \n
+    if line == None:
+        return ''
     line = line.replace('\n', '')
     if line == '':
         return line
     #  tokenize
     line = line.split('\t')
     return line
+
+
+def getLineAlt(file, line_number):
+    if line_number == -1:
+        return ''
+    try:
+        with open(file, 'r') as f:
+            for i, line in enumerate(f):
+                if i == line_number - 1:
+                    return line
+    except:
+        return ''

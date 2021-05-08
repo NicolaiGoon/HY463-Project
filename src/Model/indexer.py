@@ -7,6 +7,7 @@ from src.Model.DocumentFileEntry import DocumentFileEntry
 from src.Model.Posting import Posting
 import os
 import linecache
+from pympler.tracker import SummaryTracker
 
 
 def index(docs, terms, sorted_terms, names={}):
@@ -98,16 +99,26 @@ def exportDocuments(docs, terms, name='DocumentsFile'):
 
 
 def merge(queue):
+    tracker = SummaryTracker()
     last = False
     if len(queue) == 1:
         rel_path = pathlib.Path().absolute()
         # remove
-        os.remove(pathlib.Path().absolute().joinpath(
-            'CollectionIndex\\DocumentsFile.txt'))
-        os.remove(pathlib.Path().absolute().joinpath(
-            'CollectionIndex\\PostingFile.txt'))
-        os.remove(pathlib.Path().absolute().joinpath(
-            'CollectionIndex\\VocabularyFile.txt'))
+        try:
+            os.remove(pathlib.Path().absolute().joinpath(
+                'CollectionIndex\\DocumentsFile.txt'))
+        except:
+            1 + 1
+        try:
+            os.remove(pathlib.Path().absolute().joinpath(
+                'CollectionIndex\\PostingFile.txt'))
+        except:
+            1 + 1
+        try:
+            os.remove(pathlib.Path().absolute().joinpath(
+                'CollectionIndex\\VocabularyFile.txt'))
+        except:
+            1 + 1
         # rename files
         os.rename(rel_path.joinpath('CollectionIndex\\DocumentsFile1.txt'),
                   rel_path.joinpath('CollectionIndex\\DocumentsFile.txt'))
@@ -116,22 +127,25 @@ def merge(queue):
         os.rename(rel_path.joinpath('CollectionIndex\\PostingFile1.txt'),
                   rel_path.joinpath('CollectionIndex\\PostingFile.txt'))
     while len(queue) != 1:
-        linecache.clearcache()
         a = queue.pop(0)
         b = queue.pop(0)
         if len(queue) == 0:
             last = True
         doc_map = mergeDocuments(a, b, last)
+        linecache.clearcache()
         mergeVocPost(a, b, doc_map, last)
+        linecache.clearcache()
         queue.append(a+'&'+b)
         if len(queue) == 2:
             last = True
+    tracker.print_diff()
 
 
 def mergeVocPost(a, b, doc_map, last=False):
     vocab_a_line = 1
     vocab_b_line = 1
     posting_pointer = [1]
+    clear_cache = 1
     if last:
         merged_voc_name = 'VocabularyFile.txt'
         merged_post_name = 'PostingFile.txt'
@@ -140,6 +154,9 @@ def mergeVocPost(a, b, doc_map, last=False):
         merged_post_name = 'PostingFile' + a + '&' + b + '.txt'
     with open(pathlib.Path().absolute().joinpath('CollectionIndex\\'+merged_voc_name), 'w', encoding='utf-8') as VocabularyFile, open(pathlib.Path().absolute().joinpath('CollectionIndex\\'+merged_post_name), 'w', encoding='utf-8') as PostingFile:
         while True:
+            if Utilities.availableMemory() > 80 and clear_cache == 1:
+                linecache.clearcache()
+                clear_cache = 0
             try:
                 term_a = Vocabulary.VocabularyEntry(readIndex.getIndexLineToknized(
                     'VocabularyFile'+a+'.txt', vocab_a_line))
@@ -205,11 +222,13 @@ def mergeVocPost(a, b, doc_map, last=False):
 
 def mergePosts(term_a, a, PostingFile, posting_pointer, doc_map, term_b=None, b=None):
     pointer_a = term_a.PostingPointer
+    cache_clear = 0
     if term_b:
         pointer_b = term_b.PostingPointer
     else:
         pointer_b = -1
     while True:
+        # cache_clear += 1
         post_a = Posting(pointer_a, 'PostingFile'+a+'.txt')
         if b:
             post_b = Posting(pointer_b, 'PostingFile'+b+'.txt')
@@ -231,6 +250,9 @@ def mergePosts(term_a, a, PostingFile, posting_pointer, doc_map, term_b=None, b=
                               '\t' + str(doc_map[post_b.doc_id]) + '\n')
             posting_pointer[0] += 1
             pointer_b += 1
+        # if cache_clear >= 10000 and Utilities.availableMemory() > 80:
+        #     linecache.clearcache()
+        #     cache_clear = 0
     posting_pointer[0] += 1
     PostingFile.write('\n')
 
