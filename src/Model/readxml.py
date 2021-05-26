@@ -126,7 +126,8 @@ def readTopic():
             description = topic.find('./description')
             summary = topic.find('./summary')
             topic_type = topic.attrib['type']
-            t = Topic(topic_type, description.text, summary.text)
+            topic_num = topic.attrib['number']
+            t = Topic(topic_type, description.text, summary.text, topic_num)
             topic_array.append(t)
     return topic_array
 
@@ -145,4 +146,25 @@ def getDescendantsText(node):
             res += d.strip()
     except:
         res = ''
+    return res
+
+
+def readQrels():
+    '''
+    returns a dictionary with the qrels for the evaluation
+    '''
+    res = {}
+    file = pathlib.Path().absolute().joinpath(
+        'Resources\\Resources Corpus\\qrels.txt')
+    with open(file, 'r', encoding='utf-8') as qrels:
+        lines = qrels.readlines()
+        for line in lines:
+            q = line.split()
+            topic_number = q[0]
+            doc_id = q[2]
+            relevance = q[3]
+            if topic_number not in res:
+                res[topic_number] = {}
+            res[topic_number][doc_id] = relevance
+    
     return res
