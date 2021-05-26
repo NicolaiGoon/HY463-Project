@@ -14,6 +14,9 @@ import pathlib
 from src.Model import search
 from src.Model.Vocabulary import Vocabulary
 from src.View import Menu
+import operator
+from src.Model import Utilities as u
+from src.Model.DocumentFileEntry import DocumentFileEntry
 
 # doc = readxml.readFileXML(
 #     "C:\\Users\\xgoun\\Desktop\\PROGRAMS\\HY463\\project\\HY463-Project\\Data\\MiniCollection\\diagnosis\\Topic_1\\0\\1852545.nxml")
@@ -86,12 +89,67 @@ def startIndexing(folder):
     print("**********************")
 
 
+def evaluate(vocab, documents):
+    print('********** START EVALUATION ***********')
+    results_file = pathlib.Path().absolute().joinpath(
+        'Results\\results.txt')
+    res_list = []
+    topics = readxml.readTopic()
+    with open(results_file, 'w', encoding='utf-8') as results:
+        for q in topics:
+            # CHOOSE DESCRIPTION OR SUMMARY
+
+            #docs = search.search(vocab, q.description)[:1000]
+            docs = search.search(vocab, q.summary)[:1000]
+
+            print('Topic: '+q.number)
+            rank = 1
+            for doc in docs:
+                results.write(str(q.number)+'\t0\t'+str(doc.id) +
+                              '\t'+str(rank)+'\t'+str(doc.score)+'\t'+'ng_v1\n')
+                rank += 1
+    eval_results_file = pathlib.Path().absolute().joinpath(
+        'Results\\eval_results.txt')
+    qrels = readxml.readQrels()
+    total_scores = 0
+    ideal_scores = 0
+    max_score = 0
+    min_score = 999999999999
+    with open(eval_results_file, 'w', encoding='utf-8') as eval_res:
+        for topic in qrels.keys():
+            relevant = u.calc_relevant(qrels[topic], documents)
+            answer = u.read_results(topic, qrels[topic])
+            # check for relevant in collection
+            valid = 0
+            for doc in documents:
+                if str(doc) in relevant:
+                    valid = 1
+                    break
+            bpref = u.bpref(answer, relevant)
+            avep = u.avep(answer, relevant)
+            ndcg = u.NDCG(answer)
+            score_sum = bpref + avep + ndcg
+            total_scores += score_sum
+            if(valid):
+                if(score_sum/3 > max_score):
+                    max_score = score_sum/3
+                if(score_sum/3 < min_score):
+                    min_score = score_sum/3
+                ideal_scores += 3
+            eval_res.write(topic+'\t'+str(bpref)+'\t' +
+                           str(avep)+'\t'+str(ndcg)+'\n')
+            print('Topic: '+topic+'\tbpref: ' +
+                  str(bpref)+'\tAveP: '+str(avep)+'\tNDCG: '+str(ndcg))
+    print('Average score: '+str(total_scores/ideal_scores) +
+          '\tMax score: '+str(max_score)+'\tMin score: '+str(min_score))
+
+
 arg = ''
 if len(sys.argv) > 1:
     arg = sys.argv[1]
 
-#folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
-#folder = 'D:\\MedicalCollection\\00'
+# folder = pathlib.Path().absolute().joinpath("Data\\MiniCollection")
+# folder = 'D:\\MedicalCollection\\00'
 
 # normal indexing , really fast , requires lots of ram
 if arg == '-index':
@@ -109,30 +167,43 @@ elif arg == '-pindex':
     startPartialIndexing(folder)
 elif arg == '-test-index':
     testIndexing()
+# run evaluation
+elif arg == '-eval':
+    # load vocabulary
+    vocab = Vocabulary().entries
+    docs = []
+    line = 1
+    while True:
+        try:
+            doc = DocumentFileEntry(line)
+            docs.append(doc.id)
+            line += 1
+        except:
+            break
+    evaluate(vocab, docs)
 else:
-
-    types = {1: 'diagnosis', 2: 'test', 3: 'treatment'}
 
     # load vocabulary
     vocab = Vocabulary().entries
+    try:
+        while True:
+            print('********** START EVALUATION ***********')
+            query = str(input("Write a summary or a description:\n"))
 
-    while True:
-        print('********** START EVALUATION ***********')
-        doc_type = int(
-            input("Select type:\ndiagnosis: 1\ntest: 2\ntreatment: 3\n"))
-        query = str(input("Write a summary or a description:\n"))
+            # measure time
+            start = time.time()
 
-        # measure time
-        start = time.time()
+            docs = search.search(vocab, query)[:10]
+            end = time.time() - start
 
-        docs = search.search(vocab, query)
-        end = time.time() - start
-
-        # display results
-        print('\n---------- Query Results ------------\n')
-        for doc in docs:
-            doc.display()
-            print()
-        print('Total docs: '+str(len(docs)))
-        print('Query time: '+str(end))
-        print('---------------------------------\n')
+            # display results
+            print('\n---------- Query Results ------------\n')
+            for doc in docs:
+                doc.display()
+                print()
+            print('Total docs: '+str(len(docs)))
+            print('Query time: '+str(end))
+            print('---------------------------------\n')
+    except KeyboardInterrupt:
+        print('Exiting ...')
+        exit(0)
