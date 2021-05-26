@@ -36,7 +36,7 @@ def search(vocab, query):
         Utilities.CosSim(doc, query, vocab, posts)
         results[doc_id] = doc
 
-    return sorted(results.values(), key=operator.attrgetter('score'))
+    return sorted(results.values(), key=operator.attrgetter('score'), reverse=True)
 
 
 def getScore(doc, query, vocab, posts):
@@ -78,6 +78,6 @@ def filterDocType(doc_type, docs):
         else:
             return False
     for doc in docs:
-        if not checkType(doc.path,doc_type):
+        if not checkType(doc.path, doc_type):
             docs.remove(doc)
     return docs
