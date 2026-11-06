@@ -1,5 +1,4 @@
-import pathlib
-from src.Model import readIndex
+from src.Model.readIndex import INDEX_DIR
 from alive_progress import alive_bar
 
 
@@ -10,27 +9,20 @@ class Vocabulary:
 
     def __init__(self):
         self.entries = {}
-        # path to VocabularyFile.txt
-        file = pathlib.Path().absolute().joinpath(
-            "CollectionIndex\\VocabularyFile.txt")
-        # linecache needs str filename
-        file = str(file)
-
-        line_number = 1
-        with alive_bar(title='Loading Vocabulary:', unknown="classic") as bar:
-            while True:
-                line = readIndex.getIndexLineToknized(
-                    'Vocabulary', line_number)
-                line_number += 1
+        with open(INDEX_DIR / 'VocabularyFile.txt', encoding='utf-8') as f, \
+                alive_bar(title='Loading Vocabulary:', unknown="classic") as bar:
+            for line in f:
+                line = line.rstrip('\n')
                 if line == '':
-                    break
-                entry = self.VocabularyEntry(line)
+                    continue
+                entry = self.VocabularyEntry(line.split('\t'))
                 self.entries[entry.id] = entry
                 bar()
 
     class VocabularyEntry:
         """
-        class representing a Vocabulary entry
+        class representing a Vocabulary entry:
+        term \t df \t byte offset of the term's postings in PostingFile.txt
         """
 
         def __init__(self, tokenized_line):

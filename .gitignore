@@ -2,3 +2,5 @@ __pycache__/
 Data/
 CollectionIndex/
 .vscode/
+*.bak
+.venv/

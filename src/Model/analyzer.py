@@ -31,16 +31,21 @@ def analyzeAllDocs(folder):
     return docs
 
 
-def analyzeAllDocsPartial(folder):
+# documents kept in memory before they are written as a sorted run
+DOCS_PER_RUN = 1000
+# write a run earlier if system memory usage goes above this percentage
+MEMORY_LIMIT = 90
+
+
+def analyzeAllDocsPartial(folder, docs_per_run=DOCS_PER_RUN):
     """
-    Reads all docs in a folder and writes partially
+    Reads all docs in a folder in batches; every batch is written to disk as a sorted run.
+    Returns the runs (to be merged with indexer.merge) and the number of documents read.
     """
     docs = {}
-    queue = []
-    # partial count
-    i = 1
+    runs = []
     counter = 0
-    # read all files in folder
+    indexer.resetTmp()
     with alive_bar(title='Reading Documents:', unknown="classic") as bar:
         for root, dirs, files in os.walk(folder):
             for file in files:
@@ -52,49 +57,33 @@ def analyzeAllDocsPartial(folder):
                 docs[doc.id] = doc
                 counter += 1
                 bar()
-                # if 80 is exceeded then write partial index
-                if(utils.availableMemory() > 80):
-                # if counter % random.randint(5, 10) == 0:
-                    partialIndex(docs, i)
+                if len(docs) >= docs_per_run or \
+                        (len(docs) >= 10 and utils.availableMemory() > MEMORY_LIMIT):
+                    runs.append(partialIndex(docs, len(runs) + 1))
                     docs = {}
-                    queue.append(str(i))
-                    i += 1
         # index the last documents
         if len(docs) > 0:
-            partialIndex(docs, i)
-            queue.append(str(i))
-    indexer.exportCollectionSize(counter)
-    return queue, counter
+            runs.append(partialIndex(docs, len(runs) + 1))
+    return runs, counter
 
 
 def partialIndex(docs, i):
-    terms = analyzeTerms(docs)
-    sorted_terms = sorted(terms.keys())
-    names = {'vocab': 'VocabularyFile' +
-             str(i), 'post': 'PostingFile'+str(i), 'doc': 'DocumentsFile'+str(i)}
-
-    indexer.index(docs, terms, sorted_terms, names)
-    docs = {}
-    print()
+    """writes the docs as sorted run number i"""
+    return indexer.writeRun(docs, analyzeTerms(docs), i)
 
 
 def analyzeTerms(docs):
     terms = {}
-    with alive_bar(title='Reading Terms:', unknown='classic') as bar:
-        for doc in docs:
-            # keep words that df is rised
-            set = {}
-            for word in docs[doc].content:
-                # find if term exists
-                if word in terms and word not in set:
-                    terms[word].setDf(terms[word].df + 1)
-                else:
-                    new_term = Term(word)
-                    new_term.setDf(1)
-                    terms[word] = new_term
-                terms[word].addAppearance(docs[doc], word)
-                bar()
-
+    for doc in docs:
+        for word in docs[doc].content:
+            # content keys are unique per doc, so every hit is a new document for the term
+            if word in terms:
+                terms[word].setDf(terms[word].df + 1)
+            else:
+                new_term = Term(word)
+                new_term.setDf(1)
+                terms[word] = new_term
+            terms[word].addAppearance(docs[doc], word)
     return terms
 
 

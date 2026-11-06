@@ -1,42 +1,53 @@
-import linecache
-import pathlib
+"""
+Random access to the index files with byte offsets (seek + readline).
+Only the requested lines are read; the files are never loaded into memory.
+"""
+from pathlib import Path
+
+INDEX_DIR = Path('CollectionIndex')
+_handles = {}
 
 
-def getIndexLineToknized(type, line_number):
-    """
-    returns a tokenized line from a file in CollectionIndex
-    """
+def _fileName(type):
     if type[-4:] == '.txt':
-        file = pathlib.Path().absolute().joinpath(
-            "CollectionIndex\\" + type)
-    elif type == 'Vocabulary' or type == 'Posting' or type == 'Documents':
-        file = pathlib.Path().absolute().joinpath(
-            "CollectionIndex\\" + type + "File.txt")
-    else:
-        raise Exception('Invalid Prameter type: '+type)
-    # convert to str
-    file = str(file)
-    # get line from file
-    line = linecache.getline(file, line_number)
-    #line = getLineAlt(file, line_number)
-    # replace \n
-    if line == None:
+        return type
+    if type in ('Vocabulary', 'Posting', 'Documents'):
+        return type + 'File.txt'
+    raise Exception('Invalid Prameter type: ' + type)
+
+
+def _open(type):
+    name = _fileName(type)
+    f = _handles.get(name)
+    if f is None or f.closed:
+        f = open(INDEX_DIR / name, 'rb')
+        _handles[name] = f
+    return f
+
+
+def readLines(type, offset, count):
+    """returns `count` tokenized lines starting at byte `offset`"""
+    f = _open(type)
+    f.seek(offset)
+    return [f.readline().decode('utf-8').rstrip('\n').split('\t') for _ in range(count)]
+
+
+def getIndexLineToknized(type, offset):
+    """
+    returns the tokenized line that starts at byte `offset` of a file in CollectionIndex,
+    or '' if there is no line there
+    """
+    if offset < 0:
         return ''
-    line = line.replace('\n', '')
+    f = _open(type)
+    f.seek(offset)
+    line = f.readline().decode('utf-8').rstrip('\n')
     if line == '':
-        return line
-    #  tokenize
-    line = line.split('\t')
-    return line
+        return ''
+    return line.split('\t')
 
 
-def getLineAlt(file, line_number):
-    if line_number == -1:
-        return ''
-    try:
-        with open(file, 'r') as f:
-            for i, line in enumerate(f):
-                if i == line_number - 1:
-                    return line
-    except:
-        return ''
+def allDocumentIds():
+    """returns the ids of all documents in DocumentsFile.txt (read sequentially)"""
+    with open(INDEX_DIR / 'DocumentsFile.txt', encoding='utf-8') as f:
+        return {int(line.split('\t', 1)[0]) for line in f if line.strip()}

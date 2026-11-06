@@ -8,12 +8,13 @@ from src.Model import readxml
 from src.Model import analyzer
 from src.Model import indexer
 import time
+import statistics
 from src.Model.Document import Document
 import sys
 import pathlib
 from src.Model import search
+from src.Model import readIndex
 from src.Model.Vocabulary import Vocabulary
-from src.View import Menu
 import operator
 from src.Model import Utilities as u
 from src.Model.DocumentFileEntry import DocumentFileEntry
@@ -44,17 +45,18 @@ def testIndexing():
           str(len(terms))+"\nTotal Time: "+str(time.time()-start))
 
 
-def startPartialIndexing(folder):
+def startPartialIndexing(folder, docs_per_run=analyzer.DOCS_PER_RUN):
     print("**********************")
     # time
     start = time.time()
     tmp_time = time.time()
     # check memory usage when a document is read
     print("Starting Doc analysis ...")
-    queue, total = analyzer.analyzeAllDocsPartial(folder)
+    runs, total = analyzer.analyzeAllDocsPartial(folder, docs_per_run)
     print("Doc analysis finised\tTime: "+str(time.time()-start))
-    print("Starting merging ...")
-    indexer.merge(queue)
+    print("Starting merging of "+str(len(runs))+" runs ...")
+    tmp_time = time.time()
+    indexer.merge(runs)
     print("Merging finished\tTime: "+str(time.time()-tmp_time))
     print("----------------------")
     print("Total docs: "+str(total)+"\nTotal Time: "+str(time.time()-start))
@@ -75,13 +77,12 @@ def startIndexing(folder):
     tmp_time = time.time()
     print("Starting Term analysis ...")
     terms = analyzer.analyzeTerms(docs)
-    sorted_terms = sorted(terms.keys())
     print("Term analysis finished\tTime: "+str(time.time()-tmp_time))
     print("----------------------")
     # indexing
     tmp_time = time.time()
     print("Start Indexing ...")
-    indexer.index(docs, terms, sorted_terms)
+    indexer.index(docs, terms)
     print("Indexing finished\tTime: "+str(time.time()-tmp_time))
     print("----------------------")
     print("Total docs: "+str(len(docs))+"\nTotal terms: " +
@@ -92,7 +93,7 @@ def startIndexing(folder):
 def evaluate(vocab, documents):
     print('********** START EVALUATION ***********')
     results_file = pathlib.Path().absolute().joinpath(
-        'Results\\results.txt')
+        'Results/results.txt')
     res_list = []
     topics = readxml.readTopic()
     with open(results_file, 'w', encoding='utf-8') as results:
@@ -108,40 +109,47 @@ def evaluate(vocab, documents):
                 results.write(str(q.number)+'\t0\t'+str(doc.id) +
                               '\t'+str(rank)+'\t'+str(doc.score)+'\t'+'ng_v1\n')
                 rank += 1
-    eval_results_file = pathlib.Path().absolute().joinpath(
-        'Results\\eval_results.txt')
+    scoreResults(documents)
+
+
+def scoreResults(documents):
+    """computes bpref, AveP' and nDCG' of Results/results.txt and writes Results/eval_results.txt"""
     qrels = readxml.readQrels()
-    total_scores = 0
-    ideal_scores = 0
-    max_score = 0
-    min_score = 999999999999
-    with open(eval_results_file, 'w', encoding='utf-8') as eval_res:
-        for topic in qrels.keys():
-            relevant = u.calc_relevant(qrels[topic], documents)
-            answer = u.read_results(topic, qrels[topic])
-            # check for relevant in collection
-            valid = 0
-            for doc in documents:
-                if str(doc) in relevant:
-                    valid = 1
-                    break
-            bpref = u.bpref(answer, relevant)
-            avep = u.avep(answer, relevant)
-            ndcg = u.NDCG(answer)
-            score_sum = bpref + avep + ndcg
-            total_scores += score_sum
-            if(valid):
-                if(score_sum/3 > max_score):
-                    max_score = score_sum/3
-                if(score_sum/3 < min_score):
-                    min_score = score_sum/3
-                ideal_scores += 3
+    answers = u.read_results('Results/results.txt')
+    scores = {}
+    with open('Results/eval_results.txt', 'w', encoding='utf-8') as eval_res:
+        for topic in sorted(qrels, key=int):
+            judgments = u.judged_in_collection(qrels[topic], documents)
+            ranking = answers.get(topic, [])
+            bpref = u.bpref(ranking, judgments)
+            avep = u.avep(ranking, judgments)
+            ndcg = u.NDCG(ranking, judgments)
             eval_res.write(topic+'\t'+str(bpref)+'\t' +
                            str(avep)+'\t'+str(ndcg)+'\n')
-            print('Topic: '+topic+'\tbpref: ' +
-                  str(bpref)+'\tAveP: '+str(avep)+'\tNDCG: '+str(ndcg))
-    print('Average score: '+str(total_scores/ideal_scores) +
-          '\tMax score: '+str(max_score)+'\tMin score: '+str(min_score))
+            print('Topic: '+topic+'\tbpref: %.4f\tAveP\': %.4f\tnDCG\': %.4f' % (bpref, avep, ndcg))
+            # topics without relevant documents in the collection can not be evaluated
+            if any(rel > 0 for rel in judgments.values()):
+                scores[topic] = (bpref, avep, ndcg)
+            else:
+                print('\t(no relevant documents in the collection, excluded from the statistics)')
+    if not scores:
+        print('No topic has relevant documents in the indexed collection')
+        return
+    print('---------------------------------')
+    print('Evaluated topics: %d' % len(scores))
+    print('%-8s %8s %8s %8s %8s' % ('', 'mean', 'median', 'min', 'max'))
+    columns = list(zip(*scores.values())) + [[sum(v) / 3 for v in scores.values()]]
+    for name, values in zip(['bpref', "AveP'", "nDCG'", 'mean(3)'], columns):
+        print('%-8s %8.4f %8.4f %8.4f %8.4f' % (
+            name, statistics.mean(values), statistics.median(values), min(values), max(values)))
+
+
+def selectFolder():
+    """folder from the command line (python app.py -index <folder>), else the GUI picker"""
+    if len(sys.argv) > 2:
+        return sys.argv[2]
+    from src.View import Menu
+    return Menu.selectIndexingFolder()
 
 
 arg = ''
@@ -153,33 +161,29 @@ if len(sys.argv) > 1:
 
 # normal indexing , really fast , requires lots of ram
 if arg == '-index':
-    folder = Menu.selectIndexingFolder()
+    folder = selectFolder()
     if folder == '':
         print('No folder selected for indexing\nexiting ...')
         exit(-1)
     startIndexing(folder)
 # partial indexing , slow , requires a lot less ram
 elif arg == '-pindex':
-    folder = Menu.selectIndexingFolder()
+    folder = selectFolder()
     if folder == '':
         print('No folder selected for indexing\nexiting ...')
         exit(-1)
-    startPartialIndexing(folder)
+    # optional: python app.py -pindex <folder> <documents per run>
+    if len(sys.argv) > 3:
+        startPartialIndexing(folder, int(sys.argv[3]))
+    else:
+        startPartialIndexing(folder)
 elif arg == '-test-index':
     testIndexing()
 # run evaluation
 elif arg == '-eval':
     # load vocabulary
     vocab = Vocabulary().entries
-    docs = []
-    line = 1
-    while True:
-        try:
-            doc = DocumentFileEntry(line)
-            docs.append(doc.id)
-            line += 1
-        except:
-            break
+    docs = readIndex.allDocumentIds()
     evaluate(vocab, docs)
 else:
 

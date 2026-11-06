@@ -5,6 +5,7 @@ from src.Model.Document import Document
 from src.Model import Utilities
 import operator
 from src.Model import tokenizer
+from src.Model import readIndex
 
 
 def search(vocab, query):
@@ -47,16 +48,13 @@ def getScore(doc, query, vocab, posts):
     return doc
 
 
-def getPosts(term, posts={}):
-    pointer = term.PostingPointer
-    while True:
-        post = Posting(pointer)
-        if post.stop:
-            break
+def getPosts(term, posts):
+    # the term's df postings start at byte PostingPointer of PostingFile.txt
+    for tokens in readIndex.readLines('Posting', term.PostingPointer, term.df):
+        post = Posting(tokens)
         if post.doc_id not in posts:
             posts[post.doc_id] = {}
         posts[post.doc_id][term.id] = post
-        pointer += 1
     return posts
 
 
@@ -72,7 +70,7 @@ def filterDocType(doc_type, docs):
         '''
         determines if the document is type t using the path
         '''
-        tokens = path.split('\\')
+        tokens = path.split('/')
         if t in tokens:
             return True
         else:

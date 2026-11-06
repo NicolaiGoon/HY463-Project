@@ -10,9 +10,9 @@ def readStopWords():
     """
     rel_path = pathlib.Path().absolute()
     gr_path = pathlib.Path().absolute().joinpath(
-        'Resources\\Resources Stoplists\\stopwordsGr.txt')
+        'Resources/Resources Stoplists/stopwordsGr.txt')
     en_path = pathlib.Path().absolute().joinpath(
-        'Resources\\Resources Stoplists\\stopwordsEn.txt')
+        'Resources/Resources Stoplists/stopwordsEn.txt')
 
     stopwordsGr = open(gr_path, 'r', encoding='utf-8')
     stopwordsEn = open(en_path, 'r', encoding='utf-8')

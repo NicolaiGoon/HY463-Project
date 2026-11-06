@@ -1,15 +1,16 @@
+import functools
 import math
-import linecache
 import pathlib
 import psutil
 
 
+@functools.lru_cache(maxsize=None)
 def getCollectionSize():
-    n = linecache.getline(
-        str(pathlib.Path().absolute().joinpath("CollectionIndex\\size.txt")), 1)
-    if n == '':
+    try:
+        with open(pathlib.Path('CollectionIndex/size.txt'), encoding='utf-8') as f:
+            return int(f.read().strip())
+    except (OSError, ValueError):
         raise Exception('Please Perform Indexing')
-    return int(n)
 
 
 def norm(doc, terms, n=None):
@@ -66,104 +67,88 @@ def availableMemory():
     return stats.percent
 
 
-def sort_answer(answer):
-    sorted_ids = sorted(answer, key=lambda x: (
-        answer[x]['relevance']), reverse=True)
-    result = {}
-    for doc in sorted_ids:
-        result[doc] = answer[doc]
-    return result
+# ---------------------------------------------------------------------------
+# Evaluation measures for incomplete judgments
+#   bpref  : Buckley & Voorhees 2004 (Sakai 2007, Eq. 9)
+#   AveP'  : Average Precision on the condensed list (Sakai 2007, Eq. 20)
+#   nDCG'  : nDCG on the condensed list (Sakai 2007, Sec. 4.2)
+# The condensed list is the ranking with all unjudged documents removed.
+# `judgments` = {doc_id: relevance} (0 = non relevant, 1 = relevant, 2 = very relevant)
+# with only the judged documents that exist in the indexed collection.
+# ---------------------------------------------------------------------------
 
 
-def calc_relevant(quirels, docs):
+def judged_in_collection(topic_qrels, docs):
+    """keeps the judgments of documents that are in the indexed collection (docs: set of int ids)"""
+    return {doc: int(rel) for doc, rel in topic_qrels.items() if int(doc) in docs}
+
+
+def read_results(file='Results/results.txt'):
+    """returns {topic: [doc ids in rank order]} from results.txt"""
     res = {}
-    for doc in quirels:
-        if int(quirels[doc]) > 0 and int(doc) in docs:
-            res[doc] = {'relevance': int(quirels[doc])}
-    return res
+    with open(file, encoding='utf-8') as f:
+        for line in f:
+            tokens = line.split()
+            if len(tokens) < 4:
+                continue
+            res.setdefault(tokens[0], []).append((int(tokens[3]), tokens[2]))
+    return {t: [doc for _, doc in sorted(docs)] for t, docs in res.items()}
 
 
-def read_results(topic_num, qrels):
-    file = pathlib.Path().absolute().joinpath(
-        'Results\\results.txt')
-    res = {}
-    line_no = 1
-    flag = 0
-    while True:
-        line = linecache.getline(str(file), line_no)
-        line = line.split()
-        if line == []:
-            # EOF
-            break
-        if(topic_num == line[0]):
-            # found topic _number
-            flag = 1
-            doc_id = line[2]
-            try:
-                res[doc_id] = {'relevance': int(qrels[doc_id])}
-            except KeyError:
-                # not judged
-                res[doc_id] = {'relevance': -1}
-        elif (topic_num != line[0] and flag):
-            break
-        line_no += 1
-    return res
+def condensed(ranking, judgments):
+    """the ranking without unjudged documents"""
+    return [doc for doc in ranking if doc in judgments]
 
 
-def avep(answer, relevant):
-    judged_in_answer = 0
-    # counts the number of relevant documents
-    total_rel = 0
-    # counts the index in answer ignoring the non judged documents
-    counter = 0
-    # sum of all precisions
-    sum = 0
-    for doc in answer:
-        if doc in relevant:
-            counter += 1
-            total_rel += 1
-            sum += total_rel / counter
-        elif answer[doc]['relevance'] == 0:
-            counter += 1
-
-    if total_rel != 0:
-        return sum / total_rel
-    else:
-        return 0
-
-
-def bpref(answer, relevant):
-    R = len(relevant)
-    N = len(answer) - R
-    not_judged = 0
-    # n irellevant ranked higher
-    n = 0
-    sum = 0
-    for doc in answer:
-        if doc in relevant:
-            sum += 1 - (n/min(R, N))
-        elif answer[doc]['relevance'] == 0:
-            n += 1
-    if R == 0 or sum < 0:
-        return 0
-    return sum / R
+def bpref(ranking, judgments):
+    """
+    1/R * sum over retrieved relevant r of (1 - min(R, n_r) / min(R, N))
+    n_r: judged non relevant documents ranked above r, R / N: relevant / judged non relevant in total
+    """
+    R = sum(1 for rel in judgments.values() if rel > 0)
+    N = len(judgments) - R
+    if R == 0:
+        return 0.0
+    total = 0.0
+    nonrel = 0
+    for doc in condensed(ranking, judgments):
+        if judgments[doc] > 0:
+            # with no non relevant above (or none judged at all) there is no penalty
+            if nonrel > 0:
+                total += 1 - min(R, nonrel) / min(R, N)
+            else:
+                total += 1
+        else:
+            nonrel += 1
+    return total / R
 
 
-def DCG(answer):
-    # scale: 2 =  very relevant , 1 = relevant , 0  = irrelevant , -1 not judged
-    dcg = 0
-    i = 1
-    for d in answer:
-        if answer[d]['relevance'] != -1:
-            dcg += (2**(answer[d]['relevance'])-1)/(math.log2(i+1))
-            i += 1
-    return dcg
+def avep(ranking, judgments):
+    """AveP': precision at every relevant document of the condensed list, divided by R"""
+    R = sum(1 for rel in judgments.values() if rel > 0)
+    if R == 0:
+        return 0.0
+    total = 0.0
+    found = 0
+    for rank, doc in enumerate(condensed(ranking, judgments), 1):
+        if judgments[doc] > 0:
+            found += 1
+            total += found / rank
+    return total / R
 
 
-def NDCG(answer):
-    dcg = DCG(answer)
-    ideal_dcg = DCG(sort_answer(answer))
-    if ideal_dcg != 0:
-        return dcg/ideal_dcg
-    else:
-        return 0
+def gain(rel):
+    return 2 ** rel - 1
+
+
+def DCG(relevances):
+    return sum(gain(rel) / math.log2(rank + 1) for rank, rel in enumerate(relevances, 1))
+
+
+def NDCG(ranking, judgments, cutoff=1000):
+    """nDCG': DCG of the condensed list / DCG of the ideal ranking of all judged relevant documents"""
+    ideal = DCG(sorted((rel for rel in judgments.values() if rel > 0), reverse=True)[:cutoff])
+    if ideal == 0:
+        return 0.0
+    actual = DCG([judgments[doc] for doc in condensed(ranking, judgments)[:cutoff]])
+    return actual / ideal

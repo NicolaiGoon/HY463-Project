@@ -115,7 +115,7 @@ def readTopic():
     read all topics from topics.xml and returns them as an array of topic objects
     '''
     file = pathlib.Path().absolute().joinpath(
-        'Resources\\Resources Corpus\\topics.xml')
+        'Resources/Resources Corpus/topics.xml')
     with open(file, 'r', encoding='utf-8') as topicfile:
         xml_tree = ET.parse(topicfile)
         root = xml_tree.getroot()
@@ -155,7 +155,7 @@ def readQrels():
     '''
     res = {}
     file = pathlib.Path().absolute().joinpath(
-        'Resources\\Resources Corpus\\qrels.txt')
+        'Resources/Resources Corpus/qrels.txt')
     with open(file, 'r', encoding='utf-8') as qrels:
         lines = qrels.readlines()
         for line in lines:

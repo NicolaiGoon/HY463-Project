@@ -6,10 +6,11 @@ class DocumentFileEntry:
     class representing an entry to DocumentsFile.txt
     """
 
-    def __init__(self, line_pointer, file='Documents'):
-        tokens = readIndex.getIndexLineToknized(file, line_pointer)
+    def __init__(self, offset, file='Documents'):
+        """offset: byte offset of the entry's line"""
+        tokens = readIndex.getIndexLineToknized(file, offset)
         if tokens == '':
-            raise Exception('Invalid line pointer: '+line_pointer)
+            raise Exception('Invalid document pointer: ' + str(offset))
         self.id = int(tokens[0])
         self.path = tokens[1]
         self.norm = float(tokens[2])
