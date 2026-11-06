@@ -1,4 +1,3 @@
 nltk
 alive_progress
-linecache
 psutil
